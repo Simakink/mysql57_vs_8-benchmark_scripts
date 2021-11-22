@@ -7,10 +7,10 @@ from subprocess import check_call
 
 
 
-def create_csv(ops_v, hostname_ip):
+def create_csv(ops_v, hostname_ip, path_date):
     
     #print ops_v
-    path = os.getcwd() + "/"
+    path = os.getcwd() + "/" + path_date + "/"
     csvfile = path + hostname_ip + '-inno-ops.csv'
     
     
@@ -23,9 +23,9 @@ def create_csv(ops_v, hostname_ip):
     
 
 
-def generate_sysbench_csv(hostname_ip   ):
+def generate_sysbench_csv(hostname_ip, path_date   ):
 
-    path = os.getcwd() + "/"
+    path = os.getcwd() + "/" + path_date + "/"
     csv_filename = path + hostname_ip + "-tps-sysbench.csv"
     sysbench_filename = path + hostname_ip + "-sysbench.log"
     
@@ -64,7 +64,7 @@ def innodb_ops_list_to_csv(a, h):
     l_inserted = []
     l_read = []
     l_updated = []
-    for csv in sorted(a.iterkeys()):
+    for csv in sorted(a.keys()):
         thd = a[csv]  
         row.append(csv)  
         #print csv    
@@ -100,13 +100,12 @@ def innodb_ops_list_to_csv(a, h):
         arr = []
         i += 1 
         
-    create_csv(inno_ops_tbl, h)
+    create_csv(inno_ops_tbl, h, path_date)
         
 
-def main(host_ip):
+def main(host_ip, path_date):
     
-    status_log=host_ip + "-global-status.log"
-    
+    status_log=path_date + "/" + host_ip + "-global-status.log"
     a = []
     b = {16:[],32:[],64:[],128:[],256:[],512:[],1024:[],2048:[]}
 
@@ -116,11 +115,9 @@ def main(host_ip):
 
     #innodb_ops=os.system("cat %(status_log)s  |grep 'Innodb_rows_[deleted|inserted|read|updated]' -i | tr '\t' ','" % locals(), "r")
     p = subprocess.Popen("cat %(status_log)s  |grep 'Innodb_rows_[deleted|inserted|read|updated]' -i | tr '\t' ','" % locals(), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    
     for line in p.stdout.readlines():
-        a = line.strip().split(',')
-        
-    
+        print(line)
+        a = line.strip().decode().split(',')
         a[1] = int(a[1])
 
 
@@ -150,21 +147,21 @@ def main(host_ip):
     #retval = p.wait()
     p.stdout.close()
     
-
     return b
 
 
 if __name__ == '__main__':
     
     if (len(sys.argv) < 2):
-        raise ValueError("Hostname IP is needed")
+        raise ValueError("Hostname IP and path is needed")
         
     host_ip = sys.argv[1];
+    path_date = sys.argv[2];
     
-    innodb_ops = main(host_ip)
+    innodb_ops = main(host_ip, path_date)
     
     #print "innodb_ops:", innodb_ops
     innodb_ops_list_to_csv(innodb_ops, host_ip)
-    generate_sysbench_csv(host_ip)
+    generate_sysbench_csv(host_ip, path_date)
     
 
