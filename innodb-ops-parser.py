@@ -116,7 +116,6 @@ def main(host_ip, path_date):
     #innodb_ops=os.system("cat %(status_log)s  |grep 'Innodb_rows_[deleted|inserted|read|updated]' -i | tr '\t' ','" % locals(), "r")
     p = subprocess.Popen("cat %(status_log)s  |grep 'Innodb_rows_[deleted|inserted|read|updated]' -i | tr '\t' ','" % locals(), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for line in p.stdout.readlines():
-        print(line)
         a = line.strip().decode().split(',')
         a[1] = int(a[1])
 
